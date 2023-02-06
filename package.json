@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "build": "vue-cli-service build",
+    "develop": "NODE_OPTIONS='--openssl-legacy-provider' gatsby develop"
   },
   "dependencies": {
     "@mdi/font": "^6.4.95",
