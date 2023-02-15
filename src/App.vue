@@ -17,6 +17,9 @@
           target="_blank">
           <v-icon class="mr-2">mdi-open-in-new</v-icon>GitHub
         </v-btn>
+        <v-btn rounded color="primary" @click="downloadCSV" :disabled="chartData.length <= 1">
+          <v-icon>mdi-download</v-icon>Download CSV
+        </v-btn>
       </v-toolbar>
 
       <v-row v-if="chartData.length <= 1" justify="center" class="ma-2">
@@ -51,6 +54,7 @@ import moment from "moment";
 let noise = 0;
 let i = 1;
 let past = {}
+let csvData = "Time, Heart Rate\n";
 
 document.addEventListener('keypress', keypress_ivent);
 
@@ -150,7 +154,7 @@ export default {
         }
         result.rrIntervals = rrIntervals;
       }
-      i += 1;
+
       return result;
     },
     onValueChanged(event) {
@@ -158,10 +162,30 @@ export default {
       this.addValue(heartRate);
     },
     addValue(heartRate) {
-      this.chartData.push([moment().format("HH:mm:ss"), heartRate]);
+      const time = moment().format("HH:mm:ss");
+      this.chartData.push([time, heartRate]);
       if (this.bufferSize > 0) {
         while (this.chartData.length > this.bufferSize + 1) {
           this.chartData.splice(1, 1);
+        }
+      }
+      csvData += `${time}, ${heartRate - noise}\n`;
+    },
+    downloadCSV() {
+      const filename = "heart_rate.csv";
+      const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
+      if (navigator.msSaveBlob) { // for IE 10+
+        navigator.msSaveBlob(blob, filename);
+      } else {
+        const link = document.createElement("a");
+        if (link.download !== undefined) { // for modern browsers
+          const url = URL.createObjectURL(blob);
+          link.setAttribute("href", url);
+          link.setAttribute("download", filename);
+          link.style.visibility = "hidden";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
         }
       }
     },
